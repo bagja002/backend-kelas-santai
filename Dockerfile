@@ -37,7 +37,7 @@ COPY --from=builder /app/main .
 
 # Copy necessary configs if any (e.g., config.json if not using env vars exclusively, 
 # but best practice suggests using env vars. If config.json is verified needed, uncomment below)
-# COPY --from=builder /app/config.json . 
+ COPY --from=builder /app/config.json . 
 
 # Create directories for uploads with correct permissions
 RUN mkdir -p public/uploads/courses && \
