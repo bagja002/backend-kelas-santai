@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+node_modules
+tmp
+public/uploads
+bin
+dist
+Dockerfile
+README.md
+LICENSE
+.github
+.vscode
+config.json
