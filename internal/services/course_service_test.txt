@@ -1,0 +1,98 @@
+package services_test
+
+import (
+	"errors"
+	"testing"
+
+	"project-kelas-santai/internal/models"
+	"project-kelas-santai/internal/services"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+)
+
+// MockCourseRepository is a mock implementation of repository.CourseRepository
+type MockCourseRepository struct {
+	mock.Mock
+}
+
+func (m *MockCourseRepository) CreateCourse(course *models.Course) error {
+	args := m.Called(course)
+	return args.Error(0)
+}
+
+func (m *MockCourseRepository) GetAllCourse(category string) ([]models.Course, error) {
+	args := m.Called(category)
+
+	return args.Get(0).([]models.Course), args.Error(1)
+}
+
+func (m *MockCourseRepository) GetCourseByID(id uuid.UUID) (*models.Course, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Course), args.Error(1)
+}
+
+func (m *MockCourseRepository) UpdateCourse(course *models.Course) error {
+	args := m.Called(course)
+	return args.Error(0)
+}
+
+func (m *MockCourseRepository) DeleteCourse(id uuid.UUID) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
+// func TestGetCourseByID_Success(t *testing.T) {
+// 	// 1. Setup Mock
+// 	mockRepo := new(MockCourseRepository)
+// 	courseService := services.NewCourseService(mockRepo, mockRepo)
+
+// 	// 2. Define Data
+// 	courseID := uuid.New()
+// 	expectedCourse := &models.Course{
+// 		ID:   courseID,
+// 		Name: "Belajar Golang Dasar",
+// 	}
+
+// 	// 3. Define Expectations
+// 	mockRepo.On("GetCourseByID", courseID).Return(expectedCourse, nil)
+
+// 	// 4. Clean up assertions
+// 	defer mockRepo.AssertExpectations(t)
+
+// 	// 5. Execute
+// 	result, err := courseService.GetCourseByID(courseID)
+
+// 	// 6. Assertions
+// 	assert.NoError(t, err)
+// 	assert.NotNil(t, result)
+// 	assert.Equal(t, expectedCourse.Name, result.Name)
+// 	assert.Equal(t, expectedCourse.ID, result.ID)
+// }
+
+// func TestGetCourseByID_NotFound(t *testing.T) {
+// 	// 1. Setup Mock
+// 	mockRepo := new(MockCourseRepository)
+// 	courseService := services.NewCourseService(mockRepo, mockRepo)
+
+// 	// 2. Define Data
+// 	courseID := uuid.New()
+
+// 	// 3. Define Expectations for Error
+// 	mockRepo.On("GetCourseByID", courseID).Return(nil, errors.New("record not found"))
+
+// 	// 4. Clean up assertions
+// 	defer mockRepo.AssertExpectations(t)
+
+// 	// 5. Execute
+// 	result, err := courseService.GetCourseByID(courseID)
+
+// 	// 6. Assertions
+// 	assert.Error(t, err)
+// 	assert.Nil(t, result)
+// 	assert.Equal(t, "record not found", err.Error())
+// }
