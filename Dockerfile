@@ -47,7 +47,7 @@ RUN mkdir -p public/uploads/courses && \
 USER appuser
 
 # Expose port (adjust if necessary)
-EXPOSE 3000
+EXPOSE 7006
 
 # Set timezone (Optional, defaults to UTC, but good for "TimeNowJakarta")
 ENV TZ=Asia/Jakarta
