@@ -9,7 +9,7 @@ type Mentor struct {
 	ID            uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
 	Name          string    `json:"name"`
 	Avatar        string    `json:"avatar"`
-	Email         string    `gorm:"uniqueIndex" json:"email"`
+	Email         string    `gorm:"type:varchar(191);uniqueIndex"`
 	Password      string    `json:"-"` // Don't return password in JSON
 	GelarDepan    string    `json:"gelar_depan"`
 	GelarBelakang string    `json:"gelar_belakang"`
