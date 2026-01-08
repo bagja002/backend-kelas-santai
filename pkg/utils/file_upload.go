@@ -23,7 +23,7 @@ func HandleSingleFileUpload(c *fiber.Ctx, paramName, destFolder string) (string,
 	// ... validation logic
 
 	// Create destination folder if it doesn't exist
-	if err := os.MkdirAll(destFolder, os.ModePerm); err != nil {
+	if err := os.MkdirAll(destFolder, 0755); err != nil {
 		return "", fmt.Errorf("failed to create directory: %v", err)
 	}
 
