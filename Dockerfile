@@ -24,33 +24,114 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main ./cmd/api/main.go
 # Stage 2: Runner
 FROM alpine:latest
 
-# Install ca-certificates and tzdata for HTTPS and Timezone support
 RUN apk --no-cache add ca-certificates tzdata
 
-# Create a non-root user and group
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copy the binary from builder
+# Copy binary
 COPY --from=builder /app/main .
 
-# Copy necessary configs if any (e.g., config.json if not using env vars exclusively, 
-# but best practice suggests using env vars. If config.json is verified needed, uncomment below)
- COPY --from=builder /app/config.json . 
+# Copy config jika memang dipakai
+COPY --from=builder /app/config.json .
 
-# Create directories for uploads with correct permissions
-RUN mkdir -p public/uploads/courses && \
-    chown -R appuser:appgroup public/uploads
+# 👉 PENTING: ubah owner /app dulu
+RUN chown -R appuser:appgroup /app
 
-# Switch to non-root user
+# Switch ke non-root
 USER appuser
 
-# Expose port (adjust if necessary)
-EXPOSE 7006
+# Sekarang user punya hak penuh ke /app
+RUN mkdir -p public/uploads/courses
 
-# Set timezone (Optional, defaults to UTC, but good for "TimeNowJakarta")
+EXPOSE 7006
 ENV TZ=Asia/Jakarta
 
-# Run the binary
 CMD ["./main"]
+# Stage 2: Runner
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary
+COPY --from=builder /app/main .
+
+# Copy config jika memang dipakai
+COPY --from=builder /app/config.json .
+
+# 👉 PENTING: ubah owner /app dulu
+RUN chown -R appuser:appgroup /app
+
+# Switch ke non-root
+USER appuser
+
+# Sekarang user punya hak penuh ke /app
+RUN mkdir -p public/uploads/courses
+
+EXPOSE 7006
+ENV TZ=Asia/Jakarta
+
+CMD ["./main"]
+# Stage 2: Runner
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary
+COPY --from=builder /app/main .
+
+# Copy config jika memang dipakai
+COPY --from=builder /app/config.json .
+
+# 👉 PENTING: ubah owner /app dulu
+RUN chown -R appuser:appgroup /app
+
+# Switch ke non-root
+USER appuser
+
+# Sekarang user punya hak penuh ke /app
+RUN mkdir -p public/uploads/courses
+
+EXPOSE 7006
+ENV TZ=Asia/Jakarta
+
+CMD ["./main"]
+# Stage 2: Runner
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary
+COPY --from=builder /app/main .
+
+# Copy config jika memang dipakai
+COPY --from=builder /app/config.json .
+
+# 👉 PENTING: ubah owner /app dulu
+RUN chown -R appuser:appgroup /app
+
+# Switch ke non-root
+USER appuser
+
+# Sekarang user punya hak penuh ke /app
+RUN mkdir -p public/uploads/courses
+
+EXPOSE 7006
+ENV TZ=Asia/Jakarta
+
+CMD ["./main"]
+
+
