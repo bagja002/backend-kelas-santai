@@ -27,6 +27,7 @@ type TransactionService interface {
 
 type userCourseService struct {
 	repo repository.UserCourseRepository
+	cfg  *config.Config
 }
 
 type transactionService struct {
@@ -35,9 +36,10 @@ type transactionService struct {
 	config     *config.Config
 }
 
-func NewUserCourseService(repo repository.UserCourseRepository) UserCourseService {
+func NewUserCourseService(repo repository.UserCourseRepository, cfg *config.Config) UserCourseService {
 	return &userCourseService{
 		repo: repo,
+		cfg:  cfg,
 	}
 }
 
@@ -86,7 +88,7 @@ func (s *userCourseService) GetCoursePending(userID uuid.UUID, status string) ([
 	}
 
 	// Format Image URL
-	baseUrl := "http://localhost:4000/api/v1/static/"
+	baseUrl := s.cfg.Web.BaseUrl
 	for i := range courses {
 		courses[i].Image = baseUrl + courses[i].Image
 	}

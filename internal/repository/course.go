@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"project-kelas-santai/internal/config"
 	"project-kelas-santai/internal/database"
 	"project-kelas-santai/internal/models"
 
@@ -17,12 +18,14 @@ type CourseRepository interface {
 }
 
 type courseRepository struct {
-	db *gorm.DB
+	db  *gorm.DB
+	cfg *config.Config
 }
 
-func NewCourseRepository() CourseRepository {
+func NewCourseRepository(cfg *config.Config) CourseRepository {
 	return &courseRepository{
-		db: database.DB,
+		db:  database.DB,
+		cfg: cfg,
 	}
 }
 
@@ -40,9 +43,9 @@ func (r *courseRepository) GetAllCourse(category string, status string) ([]model
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-	// http://localhost:4000/api/v1/static/public/uploads/courses/1767669526921117000.png
+
 	err := query.Find(&course).Error
-	baseUrl := "http://localhost:4000/api/v1/static/"
+	baseUrl := r.cfg.Web.BaseUrl
 
 	for i, _ := range course {
 		course[i].Picture = baseUrl + course[i].Picture
@@ -53,7 +56,7 @@ func (r *courseRepository) GetAllCourse(category string, status string) ([]model
 func (r *courseRepository) GetCourseByID(id uuid.UUID) (*models.Course, error) {
 	var course models.Course
 	err := r.db.Preload("Curiculum").First(&course, "id = ?", id).Error
-	baseUrl := "http://localhost:4000/api/v1/static/"
+	baseUrl := r.cfg.Web.BaseUrl
 	course.Picture = baseUrl + course.Picture
 	return &course, err
 }

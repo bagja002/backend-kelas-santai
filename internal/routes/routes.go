@@ -49,7 +49,7 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	courseRepo := repository.NewCourseRepository()
+	courseRepo := repository.NewCourseRepository(cfg)
 	courseService := services.NewCourseService(courseRepo)
 	courseHandler := handlers.NewCourseHandler(courseService)
 
@@ -62,7 +62,7 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	mentorHandler := handlers.NewMentorHandler(mentorService)
 
 	userCourseRepo := repository.NewUserCourseRepository()
-	userCourseService := services.NewUserCourseService(userCourseRepo)
+	userCourseService := services.NewUserCourseService(userCourseRepo, cfg)
 	userCourseHandler := handlers.NewUserCourseHandler(userCourseService)
 
 	transactionRepo := repository.NewTransactionRepository()
