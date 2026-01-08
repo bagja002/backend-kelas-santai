@@ -32,6 +32,7 @@ type Course struct {
 type Curiculum struct {
 	ID          uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
 	CourseID    uuid.UUID `gorm:"type:char(36)" json:"course_id"`
+	NoUrut      int       `json:"no_urut"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   string    `json:"created_at"`
