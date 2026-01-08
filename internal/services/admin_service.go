@@ -33,6 +33,9 @@ func (s *adminService) CreateAdmin(admin *models.Admin) error {
 		return err
 	}
 	admin.Password = hashedPassword
+	admin.CreatedAt = utils.TimeNowJakarta()
+	admin.UpdatedAt = utils.TimeNowJakarta()
+
 	return s.repo.Create(admin)
 }
 

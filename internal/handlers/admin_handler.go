@@ -21,9 +21,25 @@ func NewAdminHandler(service services.AdminService) *AdminHandler {
 
 func (h *AdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	var admin models.Admin
-	if err := c.BodyParser(&admin); err != nil {
+
+	type request struct {
+		Name      string `json:"name"`
+		Email     string `gorm:"type:varchar(191);uniqueIndex"`
+		Password  string `json:"password"` // Don't return password in JSON
+		Type      string `json:"type"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	var requestAdmin request
+
+	if err := c.BodyParser(&requestAdmin); err != nil {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
+
+	admin.Name = requestAdmin.Name
+	admin.Email = requestAdmin.Email
+	admin.Password = requestAdmin.Password
+	admin.Type = requestAdmin.Type
 
 	if err := h.service.CreateAdmin(&admin); err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to create admin", err.Error())
