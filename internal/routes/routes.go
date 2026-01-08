@@ -14,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+//ok
+
 func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	// Middleware
 	app.Use(logger.New())
