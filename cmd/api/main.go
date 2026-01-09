@@ -26,6 +26,7 @@ func main() {
 		AppName:      cfg.App.Name,
 		ErrorHandler: middleware.ErrorHandler,
 		//Prefork:      cfg.Web.Prefork,
+		BodyLimit: 20 * 1024 * 1024,
 	})
 
 	// 4. Setup Routes
