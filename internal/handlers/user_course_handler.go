@@ -88,6 +88,33 @@ func (h *TransactionHandler) PaymentCourse(c *fiber.Ctx) error {
 	return utils.SendSuccess(c, "Payment successful", Link)
 }
 
+func (h *TransactionHandler) GetTransactionHistory(c *fiber.Ctx) error {
+	userIDStr := c.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
+	history, err := h.service.GetTransactionHistory(userID)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to fetch transaction history", err.Error())
+	}
+
+	return utils.SendSuccess(c, "Transaction history fetched successfully", history)
+}
+
+func (h *TransactionHandler) GetNotification(c *fiber.Ctx) error {
+
+	var notificationPayload map[string]interface{}
+	if err := c.BodyParser(&notificationPayload); err != nil {
+		return utils.SendError(c, fiber.StatusBadRequest, "Invalid notification payload", err.Error())
+	}
+
+	err := h.service.HandleNotification(notificationPayload)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to handle notification", err.Error())
+	}
+
+	return utils.SendSuccess(c, "Notification fetched successfully", nil)
+}
+
 func (h *UserCourseHandler) GetMyCourses(c *fiber.Ctx) error {
 	userIDStr := c.Locals("user_id").(string)
 	userID, _ := uuid.Parse(userIDStr)
@@ -98,6 +125,18 @@ func (h *UserCourseHandler) GetMyCourses(c *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccess(c, "User courses fetched successfully", userCourses)
+}
+
+func (h *UserCourseHandler) GetUserCourseDashboard(c *fiber.Ctx) error {
+	userIDStr := c.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
+	dashboard, err := h.service.GetUserCourseDashboard(userID)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to fetch user course dashboard", err.Error())
+	}
+
+	return utils.SendSuccess(c, "User course dashboard fetched successfully", dashboard)
 }
 
 func (h *UserCourseHandler) GetCoursePending(c *fiber.Ctx) error {

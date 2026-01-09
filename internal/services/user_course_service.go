@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+
 	"project-kelas-santai/internal/config"
 	"project-kelas-santai/internal/models"
 	"project-kelas-santai/internal/repository"
@@ -16,6 +17,7 @@ import (
 type UserCourseService interface {
 	EnrollCourse(userID, courseID uuid.UUID) error
 	GetUserCourses(userID uuid.UUID) ([]models.UserCourse, error)
+	GetUserCourseDashboard(userID uuid.UUID) ([]models.UserCourseDashboardResponse, error)
 	GetCoursePending(userID uuid.UUID, status string) ([]models.PendingCourse, error)
 	UpdateProgress(userID, courseID uuid.UUID, progress int) error
 	Delete(userID, courseID uuid.UUID) error
@@ -23,6 +25,8 @@ type UserCourseService interface {
 
 type TransactionService interface {
 	PaymentCourse(userId uuid.UUID, courseId []uuid.UUID) (error, string)
+	GetTransactionHistory(userID uuid.UUID) ([]models.TransactionHistoryResponse, error)
+	HandleNotification(payload map[string]interface{}) error
 }
 
 type userCourseService struct {
@@ -78,7 +82,36 @@ func (s *userCourseService) EnrollCourse(userID, courseID uuid.UUID) error {
 }
 
 func (s *userCourseService) GetUserCourses(userID uuid.UUID) ([]models.UserCourse, error) {
-	return s.repo.FindByUser(userID, "aktif")
+	return s.repo.FindByUser(userID, "paid")
+}
+
+func (s *userCourseService) GetUserCourseDashboard(userID uuid.UUID) ([]models.UserCourseDashboardResponse, error) {
+	userCourses, err := s.repo.FindDashboardByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []models.UserCourseDashboardResponse
+	for _, uc := range userCourses {
+		item := models.UserCourseDashboardResponse{
+			ID:       uc.ID,
+			CourseID: uc.CourseID,
+			Status:   uc.Status,
+			Progress: uc.Progress,
+			Course: models.CourseDashboardItem{
+				ID:           uc.Course.ID,
+				Title:        uc.Course.Title,
+				Image:        s.cfg.Web.BaseUrl + uc.Course.Picture,
+				Picture:      s.cfg.Web.BaseUrl + uc.Course.Picture,
+				Level:        uc.Course.Level,
+				MentorName:   uc.Course.MentorName,
+				TotalModules: len(uc.Course.Curiculum),
+			},
+		}
+		response = append(response, item)
+	}
+
+	return response, nil
 }
 
 func (s *userCourseService) GetCoursePending(userID uuid.UUID, status string) ([]models.PendingCourse, error) {
@@ -175,7 +208,101 @@ func (s *transactionService) PaymentCourse(userId uuid.UUID, courseId []uuid.UUI
 	if snapErr != nil {
 		return snapErr, ""
 	}
-	fmt.Println(snapResp)
 
 	return nil, snapResp.RedirectURL
+}
+
+func (s *transactionService) GetTransactionHistory(userID uuid.UUID) ([]models.TransactionHistoryResponse, error) {
+	transactions, err := s.repo.FindByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var history []models.TransactionHistoryResponse
+	for _, t := range transactions {
+		var items []models.TransactionItem
+		totalAmount := 0.0
+
+		for _, detail := range t.DetailTransaction {
+			items = append(items, models.TransactionItem{
+				CourseTitle: detail.Course.Title,
+				Price:       detail.Course.Price,
+			})
+			totalAmount += detail.Course.Price
+		}
+
+		history = append(history, models.TransactionHistoryResponse{
+			ID:        t.ID.String(),
+			Code:      t.PaymentID,
+			Amount:    totalAmount,
+			Status:    t.Status,
+			CreatedAt: t.CreatedAt,
+			Items:     items,
+		})
+	}
+
+	return history, nil
+}
+
+func (s *transactionService) HandleNotification(payload map[string]interface{}) error {
+	orderID, ok := payload["order_id"].(string)
+	if !ok {
+		return nil // or error
+	}
+
+	//order ID ==Payent Id
+	fmt.Println("orderID", orderID)
+
+	transaction, err := s.repo.FindByPaymentID(orderID)
+	if err != nil {
+		return err
+	}
+
+	transactionStatus, ok := payload["transaction_status"].(string)
+	if !ok {
+		return nil // or error
+	}
+
+	fraudStatus, _ := payload["fraud_status"].(string)
+
+	var newStatus string
+
+	if transactionStatus == "capture" {
+		if fraudStatus == "challenge" {
+			newStatus = "challenge"
+		} else if fraudStatus == "accept" {
+			newStatus = "paid"
+		}
+	} else if transactionStatus == "settlement" {
+		newStatus = "paid"
+	} else if transactionStatus == "deny" {
+		newStatus = "cancelled"
+	} else if transactionStatus == "cancel" || transactionStatus == "expire" {
+		newStatus = "cancelled"
+	} else if transactionStatus == "pending" {
+		newStatus = "pending"
+	}
+	if newStatus != "" {
+		transaction.Status = newStatus
+		s.repo.Update(transaction)
+	}
+	if transaction.Status == "paid" {
+		//Cari Detail Transaction
+		detailTransaction, err := s.repo.FindAllDetailTransaction(transaction.ID)
+		if err != nil {
+			return err
+		}
+
+		iduser := transaction.UserID
+
+		for _, detail := range detailTransaction {
+			courseId := detail.CourseID
+			s.repo.UpdatePaidUserCourse(iduser, courseId)
+		}
+
+		fmt.Println("detailTransaction", detailTransaction)
+
+	}
+
+	return nil
 }

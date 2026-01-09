@@ -96,12 +96,13 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	userIDStr := c.Locals("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid user ID", nil)
 	}
 
-	user, err := h.service.GetUserByID(id)
+	user, err := h.service.GetUserByID(userID)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusNotFound, "User not found", err.Error())
 	}
@@ -110,7 +111,8 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	userIDStr := c.Locals("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid user ID", nil)
 	}
@@ -120,7 +122,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
-	if err := h.service.UpdateUser(id, &user); err != nil {
+	if err := h.service.UpdateUser(userID, &user); err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to update user", err.Error())
 	}
 

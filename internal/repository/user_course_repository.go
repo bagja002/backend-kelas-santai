@@ -11,6 +11,7 @@ import (
 type UserCourseRepository interface {
 	Create(userCourse *models.UserCourse) error
 	FindByUser(userID uuid.UUID, status string) ([]models.UserCourse, error)
+	FindDashboardByUser(userID uuid.UUID) ([]models.UserCourse, error)
 	FindByCourse(courseID uuid.UUID) ([]models.UserCourse, error)
 	FindOne(userID uuid.UUID, courseID uuid.UUID) (*models.UserCourse, error)
 	GetPendingCourses(userID uuid.UUID) ([]models.PendingCourse, error)
@@ -35,6 +36,13 @@ func (r *userCourseRepository) Create(userCourse *models.UserCourse) error {
 func (r *userCourseRepository) FindByUser(userID uuid.UUID, status string) ([]models.UserCourse, error) {
 	var userCourses []models.UserCourse
 	err := r.db.Where("user_id = ? AND status = ?", userID, status).Find(&userCourses).Error
+	return userCourses, err
+}
+
+func (r *userCourseRepository) FindDashboardByUser(userID uuid.UUID) ([]models.UserCourse, error) {
+	var userCourses []models.UserCourse
+	err := r.db.Preload("Course.Curiculum").Where("user_id = ? AND status IN ?", userID, []string{"aktif", "paid"}).Find(&userCourses).Error
+
 	return userCourses, err
 }
 

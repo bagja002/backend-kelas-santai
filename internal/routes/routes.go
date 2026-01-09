@@ -77,8 +77,8 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	usersProtected := users.Group("/")
 	usersProtected.Use(middleware.Protected())
 	usersProtected.Get("/", userHandler.GetAllUsers)
-	usersProtected.Get("/:id", userHandler.GetUserByID)
-	usersProtected.Put("/:id", userHandler.UpdateUser)
+	usersProtected.Get("/getById", userHandler.GetUserByID)
+	usersProtected.Put("/update", userHandler.UpdateUser)
 	usersProtected.Delete("/:id", userHandler.DeleteUser)
 
 	// Admin Routes
@@ -119,10 +119,15 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	userCourses := v1.Group("/user-courses")
 	userCourses.Use(middleware.Protected())
 	userCourses.Post("/enroll", userCourseHandler.EnrollCourse)
-	userCourses.Get("/my-courses", userCourseHandler.GetMyCourses)
+	userCourses.Get("/my-courses", userCourseHandler.GetUserCourseDashboard)
+	userCourses.Get("/dashboard", userCourseHandler.GetUserCourseDashboard)
 	userCourses.Post("/payment", transactionHandler.PaymentCourse)
+
+	userCourses.Get("/transactions", transactionHandler.GetTransactionHistory)
 	userCourses.Get("/pending", userCourseHandler.GetCoursePending)
 	userCourses.Delete("/delete", userCourseHandler.DeleteCourse)
+
+	v1.Post("/callback-notification", transactionHandler.GetNotification)
 
 	// Static File Routes
 	staticFile := v1.Group("/static")
