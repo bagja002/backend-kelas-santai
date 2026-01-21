@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - Kelas Santai</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', Helvetica, Arial, sans-serif;
+            background-color: #f1f4f9;
+            margin: 0;
+            padding: 40px 20px;
+            color: #334155;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Abstract Shape Background */
+        .header-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            height: 220px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 0;
+        }
+
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            /* Overlap effect */
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: #ffffff;
+            border-radius: 60px 0 0 0;
+            z-index: 1;
+            /* Sit above the gradient, below the content */
+        }
+
+        /* Decorative circles */
+        .circle-1 {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .circle-2 {
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Front Content */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            padding: 40px;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .receipt-pill {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .success-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1);
+            margin-bottom: 30px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .check-icon {
+            width: 60px;
+            height: 60px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 16px;
+        }
+
+        .success-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 8px;
+        }
+
+        .success-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Details Section */
+        .details-grid {
+            margin-bottom: 40px;
+        }
+
+        .line-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .line-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .value {
+            font-size: 14px;
+            color: #334155;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 10px;
+        }
+
+        .total-label {
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .total-amount {
+            font-weight: 800;
+            color: #4f46e5;
+            font-size: 18px;
+        }
+
+        /* Next Steps / Group Button */
+        .next-steps {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .next-steps::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .steps-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .steps-desc {
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            margin-top: 0;
+        }
+
+        .btn-group {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            font-size: 15px;
+        }
+
+        .btn-group:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin: 4px 0;
+        }
+
+        .socials {
+            margin-bottom: 20px;
+        }
+
+        .social-link {
+            display: inline-block;
+            margin: 0 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header Background -->
+        <div class="header-bg">
+            <div class="circle-1"></div>
+            <div class="circle-2"></div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Top Nav -->
+            <div class="top-nav">
+                <a href="#" class="logo">Kelas Santai.</a>
+                <span class="receipt-pill">#{{ .InvoiceNumber }}</span>
+            </div>
+
+            <!-- Success Card -->
+            <div class="success-card">
+                <div class="check-icon">✓</div>
+                <h2 class="success-title">Pembayaran Berhasil!</h2>
+                <p class="success-subtitle">Terima kasih, {{ .UserName }}! Akses kelasmu sudah aktif.</p>
+            </div>
+
+            <!-- Invoice Details -->
+            <div class="details-grid">
+                <div class="line-item">
+                    <span class="label">Tanggal</span>
+                    <span class="value">{{ .Date }}</span>
+                </div>
+                <div class="line-item">
+                    <span class="label">Kelas</span>
+                    <span class="value" style="color: #4f46e5;">{{ .CourseName }}</span>
+                </div>
+                <div class="line-item">
+                    <span class="label">Mentor</span>
+                    <span class="value">{{ .MentorName }}</span>
+                </div>
+                <div class="line-item">
+                    <span class="label">Level</span>
+                    <span class="value">{{ .Level }}</span>
+                </div>
+
+                <div class="total-row">
+                    <span class="total-label">Total Pembayaran</span>
+                    <span class="total-amount">Rp {{ .Total }}</span>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="next-steps">
+                <span class="steps-title">🚀 Langkah Selanjutnya</span>
+                <p class="steps-desc">
+                    Bergabunglah dengan grup komunitas kami untuk berdiskusi langsung dengan mentor dan teman sekelas
+                    lainnya.
+                </p>
+                <a href="{{ .GroupLink }}" class="btn-group">Masuk Grup Komunitas</a>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div class="socials">
+                    <a href="https://instagram.com/kelassantai" class="social-link">Instagram</a>
+                    <a href="https://twitter.com/kelassantai" class="social-link">Twitter</a>
+                    <a href="https://kelassantai.com" class="social-link">Website</a>
+                </div>
+                <p>&copy; 2024 Kelas Santai. All rights reserved.</p>
+                <p>Jakarta, Indonesia</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

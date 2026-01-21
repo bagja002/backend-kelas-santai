@@ -43,6 +43,7 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 		&models.UserCourse{},
 		&models.Transaction{},
 		&models.DetailTransaction{},
+		&models.Voucer{},
 	)
 
 	userRepo := repository.NewUserRepository()
@@ -65,9 +66,14 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	userCourseService := services.NewUserCourseService(userCourseRepo, cfg)
 	userCourseHandler := handlers.NewUserCourseHandler(userCourseService)
 
+	voucerRepo := repository.NewVoucerRepository(database.DB)
+
 	transactionRepo := repository.NewTransactionRepository()
-	transactionService := services.NewTransactionService(transactionRepo, cfg)
+	transactionService := services.NewTransactionService(transactionRepo, voucerRepo, cfg)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
+
+	voucerService := services.NewVoucerService(voucerRepo)
+	voucerHandler := handlers.NewVoucerHandler(voucerService)
 
 	// User Routes
 	users := v1.Group("/users")
@@ -128,6 +134,15 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	userCourses.Delete("/delete", userCourseHandler.DeleteCourse)
 
 	v1.Post("/callback-notification", transactionHandler.GetNotification)
+
+	// Voucer Routes
+	voucers := v1.Group("/voucers")
+	voucers.Use(middleware.Protected(), middleware.AdminProtected())
+	voucers.Post("/", voucerHandler.CreateVoucer)
+	voucers.Get("/", voucerHandler.GetAllVoucer)
+	voucers.Get("/:id", voucerHandler.GetVoucerById)
+	voucers.Put("/:id", voucerHandler.UpdateVoucer)
+	voucers.Delete("/:id", voucerHandler.DeleteVoucer)
 
 	// Static File Routes
 	staticFile := v1.Group("/static")

@@ -24,6 +24,7 @@ type TransactionRepository interface {
 	UpdateDetailTransaction(detail *models.DetailTransaction) error
 	DeleteDetailTransaction(id uuid.UUID) error
 	UpdatePaidUserCourse(idUser uuid.UUID, courseId uuid.UUID) error
+	//GetVoucerById(id string) (*models.Voucer, error)
 }
 
 type transactionRepository struct {

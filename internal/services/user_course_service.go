@@ -24,7 +24,7 @@ type UserCourseService interface {
 }
 
 type TransactionService interface {
-	PaymentCourse(userId uuid.UUID, courseId []uuid.UUID) (error, string)
+	PaymentCourse(userId uuid.UUID, courseId []uuid.UUID, voucerId uuid.UUID) (error, string)
 	GetTransactionHistory(userID uuid.UUID) ([]models.TransactionHistoryResponse, error)
 	HandleNotification(payload map[string]interface{}) error
 }
@@ -36,6 +36,7 @@ type userCourseService struct {
 
 type transactionService struct {
 	repo       repository.TransactionRepository
+	voucerRepo repository.VoucerRepository
 	snapClient snap.Client
 	config     *config.Config
 }
@@ -47,7 +48,7 @@ func NewUserCourseService(repo repository.UserCourseRepository, cfg *config.Conf
 	}
 }
 
-func NewTransactionService(repo repository.TransactionRepository, config *config.Config) TransactionService {
+func NewTransactionService(repo repository.TransactionRepository, voucerRepo repository.VoucerRepository, config *config.Config) TransactionService {
 
 	var env midtrans.EnvironmentType
 	if config.Midtrans.Environment == "production" {
@@ -60,6 +61,7 @@ func NewTransactionService(repo repository.TransactionRepository, config *config
 	s.New(config.Midtrans.ServerKey, env)
 	return &transactionService{
 		repo:       repo,
+		voucerRepo: voucerRepo,
 		config:     config,
 		snapClient: s,
 	}
@@ -151,7 +153,7 @@ func (s *userCourseService) Delete(userID, courseID uuid.UUID) error {
 	return s.repo.Delete(userCourse)
 }
 
-func (s *transactionService) PaymentCourse(userId uuid.UUID, courseId []uuid.UUID) (error, string) {
+func (s *transactionService) PaymentCourse(userId uuid.UUID, courseId []uuid.UUID, VoucerId uuid.UUID) (error, string) {
 
 	//Create Transcation Data
 	transaction := &models.Transaction{
@@ -178,6 +180,14 @@ func (s *transactionService) PaymentCourse(userId uuid.UUID, courseId []uuid.UUI
 			return err, ""
 		}
 		totalPrice += int(course.Price)
+	}
+	//Masukan Harga Discound dengan Mengambil ID Voucernya
+	if VoucerId != uuid.Nil {
+		voucer, err := s.voucerRepo.GetVoucerById(VoucerId)
+		if err != nil {
+			return err, ""
+		}
+		totalPrice -= int(voucer.Discount)
 	}
 
 	//Create Detail Transcation

@@ -59,9 +59,21 @@ func (h *TransactionHandler) PaymentCourse(c *fiber.Ctx) error {
 		CourseID string `json:"course_id"`
 	}
 
+	type Discount struct {
+		VoucerId string `json:"voucer_id"`
+	}
+
 	var request []PaymentRequest
 	if err := c.BodyParser(&request); err != nil {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+	var discount Discount
+	if err := c.BodyParser(&discount); err != nil {
+		return utils.SendError(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+	voucerID, err := uuid.Parse(discount.VoucerId)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusBadRequest, "Invalid UUIDs", err.Error())
 	}
 	userIDStr := c.Locals("user_id").(string)
 	userID, _ := uuid.Parse(userIDStr)
@@ -74,7 +86,7 @@ func (h *TransactionHandler) PaymentCourse(c *fiber.Ctx) error {
 		ListCourseId = append(ListCourseId, courseID)
 	}
 
-	err, directURL := h.service.PaymentCourse(userID, ListCourseId)
+	err, directURL := h.service.PaymentCourse(userID, ListCourseId, voucerID)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to enroll in course", err.Error())
 	}
