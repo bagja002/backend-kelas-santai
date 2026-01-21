@@ -13,6 +13,7 @@ type VoucerService interface {
 	GetVoucerById(id uuid.UUID) (*models.Voucer, error)
 	UpdateVoucer(voucer *models.Voucer) error
 	DeleteVoucer(id string) error
+	GetVoucerName(name string) (models.Voucer, error)
 }
 
 type voucerService struct {
@@ -43,4 +44,8 @@ func (s *voucerService) UpdateVoucer(voucer *models.Voucer) error {
 
 func (s *voucerService) DeleteVoucer(id string) error {
 	return s.repo.DeleteVoucer(id)
+}
+
+func (s *voucerService) GetVoucerName(name string) (models.Voucer, error) {
+	return s.repo.GetVoucerName(name)
 }

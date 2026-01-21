@@ -143,6 +143,7 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	voucers.Get("/:id", voucerHandler.GetVoucerById)
 	voucers.Put("/:id", voucerHandler.UpdateVoucer)
 	voucers.Delete("/:id", voucerHandler.DeleteVoucer)
+	voucers.Get("/getVoucer", voucerHandler.GetVoucer)
 
 	// Static File Routes
 	staticFile := v1.Group("/static")

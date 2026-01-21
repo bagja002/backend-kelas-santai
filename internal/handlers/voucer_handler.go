@@ -105,3 +105,22 @@ func (h *VoucerHandler) DeleteVoucer(c *fiber.Ctx) error {
 
 	return utils.SendSuccess(c, "Voucer deleted successfully", nil)
 }
+
+func (h *VoucerHandler) GetVoucer(c *fiber.Ctx) error {
+
+	type Request struct {
+		Name string `json:"name"`
+	}
+
+	var req Request
+	if err := c.BodyParser(&req); err != nil {
+		return utils.SendError(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	voucers, err := h.service.GetVoucerName(req.Name)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusInternalServerError, "Failed to fetch voucers", err.Error())
+	}
+
+	return utils.SendSuccess(c, "Voucers fetched successfully", voucers)
+}

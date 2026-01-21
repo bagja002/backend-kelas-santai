@@ -35,12 +35,19 @@ func (v *voucerRepository) DeleteVoucer(id string) error {
 	return v.db.Where("id = ?", id).Delete(&models.Voucer{}).Error
 }
 
+func (v *voucerRepository) GetVoucerName(name string) (models.Voucer, error) {
+	var voucer models.Voucer
+	err := v.db.Where("name = ?", name).First(&voucer).Error
+	return voucer, err
+}
+
 type VoucerRepository interface {
 	CreateVoucer(voucer *models.Voucer) error
 	GetVoucerAll() ([]models.Voucer, error)
 	GetVoucerById(id uuid.UUID) (*models.Voucer, error)
 	UpdateVoucer(voucer *models.Voucer) error
 	DeleteVoucer(id string) error
+	GetVoucerName(name string) (models.Voucer, error)
 }
 
 func NewVoucerRepository(db *gorm.DB) VoucerRepository {
