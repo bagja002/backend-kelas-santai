@@ -65,6 +65,9 @@ func (h *TransactionHandler) PaymentCourse(c *fiber.Ctx) error {
 	}
 
 	voucerID := c.Query("voucer_id")
+	if voucerID == "" {
+		voucerID = "00000000-0000-0000-0000-000000000000"
+	}
 	voucer, err := uuid.Parse(voucerID)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusBadRequest, "Invalid UUIDs", err.Error())
