@@ -69,7 +69,8 @@ func SetupRoutes(app *fiber.App, cfg *config.Config) {
 	voucerRepo := repository.NewVoucerRepository(database.DB)
 
 	transactionRepo := repository.NewTransactionRepository()
-	transactionService := services.NewTransactionService(transactionRepo, voucerRepo, cfg)
+	emailService := services.NewEmailService(cfg)
+	transactionService := services.NewTransactionService(transactionRepo, voucerRepo, emailService, cfg)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	voucerService := services.NewVoucerService(voucerRepo)

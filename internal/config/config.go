@@ -15,6 +15,14 @@ type Config struct {
 	CaptchaSecret string         `mapstructure:"captchaSecret"`
 	JWTSecret     string         `mapstructure:"jwt_secret"`
 	Midtrans      MidtransConfig `mapstructure:"midtrans"`
+	Email         EmailConfig    `mapstructure:"email"`
+}
+
+type EmailConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
 }
 type MidtransConfig struct {
 	ServerKey   string `mapstructure:"server_key"`

@@ -35,10 +35,11 @@ type userCourseService struct {
 }
 
 type transactionService struct {
-	repo       repository.TransactionRepository
-	voucerRepo repository.VoucerRepository
-	snapClient snap.Client
-	config     *config.Config
+	repo         repository.TransactionRepository
+	voucerRepo   repository.VoucerRepository
+	snapClient   snap.Client
+	config       *config.Config
+	emailService EmailService
 }
 
 func NewUserCourseService(repo repository.UserCourseRepository, cfg *config.Config) UserCourseService {
@@ -48,7 +49,7 @@ func NewUserCourseService(repo repository.UserCourseRepository, cfg *config.Conf
 	}
 }
 
-func NewTransactionService(repo repository.TransactionRepository, voucerRepo repository.VoucerRepository, config *config.Config) TransactionService {
+func NewTransactionService(repo repository.TransactionRepository, voucerRepo repository.VoucerRepository, emailService EmailService, config *config.Config) TransactionService {
 
 	var env midtrans.EnvironmentType
 	if config.Midtrans.Environment == "production" {
@@ -60,10 +61,11 @@ func NewTransactionService(repo repository.TransactionRepository, voucerRepo rep
 	var s snap.Client
 	s.New(config.Midtrans.ServerKey, env)
 	return &transactionService{
-		repo:       repo,
-		voucerRepo: voucerRepo,
-		config:     config,
-		snapClient: s,
+		repo:         repo,
+		voucerRepo:   voucerRepo,
+		config:       config,
+		snapClient:   s,
+		emailService: emailService,
 	}
 }
 
@@ -305,13 +307,48 @@ func (s *transactionService) HandleNotification(payload map[string]interface{}) 
 
 		iduser := transaction.UserID
 
+		var courseNames []string
+		totalAmount := 0
+		var mentorName string
+		var level string
+
 		for _, detail := range detailTransaction {
 			courseId := detail.CourseID
 			s.repo.UpdatePaidUserCourse(iduser, courseId)
+			courseNames = append(courseNames, detail.Course.Title)
+			totalAmount += int(detail.Course.Price)
+			mentorName = detail.Course.MentorName // Ambil dari salah satu course
+			level = detail.Course.Level           // Ambil dari salah satu course
 		}
 
 		fmt.Println("detailTransaction", detailTransaction)
 
+		// Get User Data
+		user, err := s.repo.FindUser(iduser)
+		if err == nil {
+			// Prepare Invoice Data
+			invoiceData := InvoiceData{
+				InvoiceNumber: transaction.PaymentID,
+				UserName:      user.Name,
+				Date:          utils.TimeNowJakarta(),
+				CourseName:    fmt.Sprintf("%v", courseNames), // Join names if multiple
+				MentorName:    mentorName,
+				Level:         level,
+				Total:         fmt.Sprintf("%d", totalAmount),
+				GroupLink:     "https://t.me/kelassantai", // Placeholder or dynamic link
+			}
+
+			// Send Email asynchronously
+			go func() {
+				// Pastikan path template sesuai lokasi di server/local
+				templatePath := "internal/templates/invoice.html"
+				if err := s.emailService.SendInvoiceTemplate(user.Email, invoiceData, templatePath); err != nil {
+					fmt.Printf("Failed to send invoice email to %s: %v\n", user.Email, err)
+				} else {
+					fmt.Printf("Invoice sent to %s\n", user.Email)
+				}
+			}()
+		}
 	}
 
 	return nil

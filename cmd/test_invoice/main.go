@@ -1,63 +1,43 @@
 package main
 
 import (
-	"html/template"
 	"log"
-	"os"
-	"path/filepath"
+	"project-kelas-santai/internal/config"
+	"project-kelas-santai/internal/services"
+	"time"
 )
 
-type InvoiceData struct {
-	InvoiceNumber string
-	Date          string
-	UserName      string
-	UserEmail     string
-	CourseName    string
-	Level         string
-	MentorName    string
-	Price         string
-	Total         string
-	GroupLink     string
-}
-
 func main() {
-	// Define paths
-	cwd, _ := os.Getwd()
-	templatePath := filepath.Join(cwd, "internal", "templates", "invoice.html")
-	outputPath := filepath.Join(cwd, "test_invoice.html")
-
-	// Parse template
-	tmpl, err := template.ParseFiles(templatePath)
+	// Load config
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Error parsing template: %v", err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Mock data
-	data := InvoiceData{
-		InvoiceNumber: "20241025-001",
-		Date:          "25 Oktober 2024",
-		UserName:      "Budi Santoso",
-		UserEmail:     "budi@example.com",
+	// Initialize email service
+	emailService := services.NewEmailService(cfg)
+
+	// Prepare data
+	data := services.InvoiceData{
+		InvoiceNumber: "INV-20241027-001",
+		UserName:      "Barja Faskan",
+		Date:          time.Now().Format("02 January 2006"),
 		CourseName:    "Belajar Golang dari Nol",
-		Level:         "Pemula",
 		MentorName:    "Eko Kurniawan",
-		Price:         "1.500.000",
+		Level:         "Intermediate",
 		Total:         "1.500.000",
-		GroupLink:     "https://t.me/kelassantai_golang",
+		GroupLink:     "https://t.me/kelas_santai_golang",
 	}
 
-	// Create output file
-	f, err := os.Create(outputPath)
+	// Send invoice template
+	templatePath := "/Users/ferdiansyah/Downloads/BackupProjec/project-kelas-santai/internal/templates/invoice.html"
+	to := "barjafaskan9@gmail.com"
+
+	log.Printf("Sending invoice to %s...", to)
+	err = emailService.SendInvoiceTemplate(to, data, templatePath)
 	if err != nil {
-		log.Fatalf("Error creating output file: %v", err)
-	}
-	defer f.Close()
-
-	// Execute template
-	err = tmpl.Execute(f, data)
-	if err != nil {
-		log.Fatalf("Error executing template: %v", err)
+		log.Fatalf("Failed to send invoice: %v", err)
 	}
 
-	log.Printf("Successfully created test invoice at: %s", outputPath)
+	log.Println("Invoice sent successfully!")
 }
