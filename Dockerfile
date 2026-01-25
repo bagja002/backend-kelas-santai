@@ -35,6 +35,7 @@ COPY --from=builder /app/main .
 
 # Copy config jika memang dipakai
 COPY --from=builder /app/config.json .
+COPY --from=builder /app/internal/templates/invoice.html .
 
 # 👉 PENTING: ubah owner /app dulu
 RUN chown -R appuser:appgroup /app
@@ -44,6 +45,7 @@ USER appuser
 
 # Sekarang user punya hak penuh ke /app
 RUN mkdir -p public/uploads/courses
+RUN mkdir -p internal/templates/invoice.html
 
 EXPOSE 7006
 ENV TZ=Asia/Jakarta
