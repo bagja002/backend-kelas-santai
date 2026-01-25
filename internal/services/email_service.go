@@ -49,7 +49,7 @@ func (s *emailService) SendEmail(to string, subject string, body string, attachm
 		m.Attach(attachment)
 	}
 
-	d := gomail.NewDialer(s.cfg.Email.Host, s.cfg.Email.Port, s.cfg.Email.User, s.cfg.Email.Password)
+	d := gomail.NewDialer(s.cfg.Email.Host, s.cfg.Email.Port, s.cfg.Email.User, s.cfg.Web.AppPassword)
 
 	if err := d.DialAndSend(m); err != nil {
 		return err
