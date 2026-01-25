@@ -335,7 +335,7 @@ func (s *transactionService) HandleNotification(payload map[string]interface{}) 
 				MentorName:    mentorName,
 				Level:         level,
 				Total:         fmt.Sprintf("%d", totalAmount),
-				GroupLink:     "https://t.me/kelassantai", // Placeholder or dynamic link
+				GroupLink:     "https://chat.whatsapp.com/DfudilytwV5F3WPngshmEz?mode=gi_t", // Placeholder or dynamic link
 			}
 
 			// Send Email asynchronously
